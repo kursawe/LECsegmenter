@@ -149,7 +149,7 @@ cv.destroyAllWindows() #To reinitialize previous windows (if applicable)
 
 print("Reading files...")
 
-basepath ="/Users/thibautgold/Documents/STACKS"
+basepath ="./STACKS"
 photos=[]
 for entry in os.listdir(basepath): #Read all photos
     if os.path.isfile(os.path.join(basepath, entry)):
