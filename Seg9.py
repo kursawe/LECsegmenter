@@ -5,8 +5,8 @@ Created on Mon Nov 25 22:23:53 2019
 
 @author: Thibaut Goldsborough, tg76@st-andrews.ac.uk
 """
-
-
+#basepath ="./STACKS/SPJob1_120218_1"
+basepath ="./STACKS/STACKS_0"
 #%matplotlib auto
 import os, sys
 import numpy as np
@@ -89,8 +89,10 @@ def watershed(img):
 def simple_watershed(img):
     global output,Centroid_list,nb_components
     Centroid_list=[]
-    edges= np.pad(np.ones((dim1-2,dim2-2)), pad_width=1, mode='constant', constant_values=0)    
+    edges= np.pad(np.ones((dim1-2,dim2-2)), pad_width=1, mode='constant', constant_values=0)   
+   # print(img,edges)
     img=img*edges
+    
     img=img.astype(np.uint8)
     nb_components, output, stats, centroids = cv.connectedComponentsWithStats(cv.bitwise_not(img),\
     connectivity=4)
@@ -285,24 +287,26 @@ def update_numbers(membrane_outlines,frame_num,speed="Fast"):
 
 def save_all_work(boolean):
       for frame_num in range(len(outcome)):
-        outline=outcome[frame_num][2].copy()    
-        if frame_num==0:
-            Channel3_Mask,Channel1_Mask=watershed(outline)
-            outcome[frame_num][1]=Channel1_Mask.copy()
-            outcome[frame_num][0]=Channel3_Mask.copy()
-            Numbers_Mask=update_numbers(outline,frame_num,"Slow")
-            outcome[frame_num][3]=Numbers_Mask.copy()
-            
-        if frame_num>0:
-            prev_frame=outcome[frame_num-1][1].copy()
-            Channel3_Mask,Channel1_Mask=follow_cells_and_watershed(prev_frame,outline)
-            outcome[frame_num][1]=Channel1_Mask.copy()
-            outcome[frame_num][0]=Channel3_Mask.copy()
-            Numbers_Mask=update_numbers(outline,frame_num,"Slow")
-            outcome[frame_num][3]=Numbers_Mask.copy()
-        if boolean==True:  
-            with open('SAVED_WORK', 'wb') as outfile:
-                pickle.dump(outcome, outfile, pickle.HIGHEST_PROTOCOL)
+                   
+          outline=outcome[frame_num][2].copy()    
+          if len(outcome[frame_num][2])==0:
+              break
+          if frame_num==0:
+                Channel3_Mask,Channel1_Mask=watershed(outline)
+                outcome[frame_num][1]=Channel1_Mask.copy()
+                outcome[frame_num][0]=Channel3_Mask.copy()
+                Numbers_Mask=update_numbers(outline,frame_num,"Slow")
+                outcome[frame_num][3]=Numbers_Mask.copy()              
+          if frame_num>0:
+                prev_frame=outcome[frame_num-1][1].copy()
+                Channel3_Mask,Channel1_Mask=follow_cells_and_watershed(prev_frame,outline)
+                outcome[frame_num][1]=Channel1_Mask.copy()
+                outcome[frame_num][0]=Channel3_Mask.copy()
+                Numbers_Mask=update_numbers(outline,frame_num,"Slow")
+                outcome[frame_num][3]=Numbers_Mask.copy()
+          if boolean==True:  
+                with open('SAVED_WORK', 'wb') as outfile:
+                    pickle.dump(outcome, outfile, pickle.HIGHEST_PROTOCOL)
             
 def display(outcome):
     cv.namedWindow('Press E to Exit')  
@@ -397,7 +401,7 @@ def plot_cell_movement(CELL_DICTIONARY):
     
 print("Reading files...")
 
-basepath ="./STACKS"
+
 photos=[]
 for entry in os.listdir(basepath): #Read all photos
     if os.path.isfile(os.path.join(basepath, entry)):
@@ -449,7 +453,7 @@ print("Done")
 
 tiff_images=[]
 for Image in local_maxima_list:
-    tiff_images.append((cv.imread(basepath+"/"+photos[Image],cv.IMREAD_GRAYSCALE),(cv.imread(basepath+"/"+photos[Image+1],cv.IMREAD_GRAYSCALE))))
+    tiff_images.append((cv.imread(basepath+"/"+photos[Image],cv.IMREAD_GRAYSCALE),(cv.imread(basepath+"/"+photos[Image-1],cv.IMREAD_GRAYSCALE))))
  
     
 
@@ -543,10 +547,10 @@ while iter_photo < len(tiff_images):
         cv.namedWindow(Image_str,flags=cv.WINDOW_NORMAL)
         cv.moveWindow(Image_str,10,10)
         cv.resizeWindow(Image_str,1300,800) 
-        cv.createTrackbar('A',Image_str,118,200,nothing)
-        cv.createTrackbar('B',Image_str,53,200,nothing)
-        cv.createTrackbar('C',Image_str,5,20,nothing)
-        cv.createTrackbar('D',Image_str,1,1,nothing)
+        cv.createTrackbar('Second Threshold',Image_str,118,200,nothing)
+        cv.createTrackbar('Third Threshold',Image_str,53,200,nothing)
+        cv.createTrackbar('First (Adaptive) Threshold',Image_str,5,20,nothing)
+        cv.createTrackbar('On/Off',Image_str,1,1,nothing)
      
     update_numbers(saved_list[-1],iter_photo)
 
@@ -600,10 +604,10 @@ while iter_photo < len(tiff_images):
 
         if Display_Mode==True: 
 
-            a2 = cv.getTrackbarPos('A',Image_str) 
-            b2 = cv.getTrackbarPos('B',Image_str) #53
-            c2= cv.getTrackbarPos('C',Image_str)
-            d2 = cv.getTrackbarPos('D',Image_str)
+            a2 = cv.getTrackbarPos('Second Threshold',Image_str) 
+            b2 = cv.getTrackbarPos('Third Threshold',Image_str) #53
+            c2= cv.getTrackbarPos('First (Adaptive) Threshold',Image_str)
+            d2 = cv.getTrackbarPos('On/Off',Image_str)
             
             frames=process_image(Base_Image,a2,b2,c2,d2)
             horizontal1 = np.hstack((frames[0],frames[1],frames[2]))
