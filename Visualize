@@ -17,9 +17,9 @@ import pickle as pickle
 import easygui as gui
 from xlwt import Workbook 
 
-if answer==False:  
-    with open('SAVED_WORK', 'rb') as infile:
-        outcome = pickle.load(infile) 
+
+with open('SAVED_WORK', 'rb') as infile:
+    outcome = pickle.load(infile) 
 
 def display(outcome):
     cv.namedWindow('Press E to Exit')  
