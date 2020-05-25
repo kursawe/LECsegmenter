@@ -6,7 +6,8 @@ Created on Mon Nov 25 22:23:53 2019
 @author: Thibaut Goldsborough, tg76@st-andrews.ac.uk
 """
 #basepath ="./STACKS/SPJob1_120218_1"
-basepath ="./STACKS/STACKS_0"
+#basepath ="./STACKS/STACKS_0"
+basepath ="./STACKS"
 #%matplotlib auto
 import os, sys
 import numpy as np
