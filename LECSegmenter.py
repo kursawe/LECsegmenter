@@ -9,19 +9,19 @@ Created on Mon Nov 25 22:23:53 2019
 #from tkinter import * 
 from tkinter import filedialog
 
-basepath = filedialog.askdirectory(initialdir="/Users/meghashanthakumar/Desktop/LECsegmenter", title="Select folder to analyse")
-print(basepath) 
-saving_location = filedialog.asksaveasfilename(initialdir = "/Users/meghashanthakumar/Desktop/LECsegmenter",title = "Select file",filetypes = (("TIF files","*.tif"),("all files","*.*")))
-#Download the following packages: 
-#%matplotlib auto
 #os provides functions for interacting with the operating system
 import os, sys
+
+basepath = filedialog.askdirectory(initialdir=os.path.dirname(__file__), title="Select folder to analyse")
+print(basepath) 
+#Download the following packages: 
+#%matplotlib auto
 #numpy is a multidimensional array used to store values of same datatype and
 #is indexed with values starting from 0
 import numpy as np
 #opencv
 import cv2 as cv
-from PIL import Image
+import PIL.Image
 from tkinter import * 
 from tkinter import ttk 
 #from numpy import asarray
@@ -51,12 +51,14 @@ answer=gui.buttonbox("Would you like to Start Over or Continue Previous Project?
 if answer=="Start Over":
     answer=True
     #if you choose to continue, we asign the value false. 
+    saving_location = filedialog.asksaveasfilename(initialdir = os.path.dirname(__file__),title = "Select saving location",filetypes = (("all files","*.*"),))
 if answer=="Previous Project":
     answer=False
+    loading_location = filedialog.askopenfilename(initialdir = os.path.dirname(__file__),title = "Select loading location",filetypes = (("all files","*.*"),))
+    saving_location = loading_location
 #If False is selected, then it opens saved work, where rb is the reading and writing mode
     #pickling is a method to serialize objects, save it to a file and retrive them later and pickle.load is assigned to directory called outcome
-if answer==False:  
-    with open('SAVED_WORK', 'rb') as infile:
+    with open(loading_location, 'rb') as infile:
         outcome = pickle.load(infile)
         
 #def is used to define a function;
@@ -408,8 +410,8 @@ def process_image(img,a,b,c,d):
 #update numbers is used to update the cell numbers each time you draw of the image in drawing mode
 def update_numbers(membrane_outlines,frame_num,speed="Fast"):
     global Numbers, tiff_images
-    Image=tiff_images[frame_num]
-    Base_Image=2*(Image[0]+Image[1])
+    Image_=tiff_images[frame_num]
+    Base_Image=2*(Image_[0]+Image_[1])
     
     Numbers=np.zeros((dim1,dim2)).astype(np.uint8)
     if speed=="Slow":  
@@ -432,40 +434,51 @@ def update_numbers(membrane_outlines,frame_num,speed="Fast"):
     return left_panel
 
 def save_all_work(boolean):
-      global outcome
-      for frame_num in range(len(outcome)):
+    print('Start saving')
+    global outcome
+    for frame_num in range(len(outcome)):
 #For every frame in a video, outcome has 3 diff values where channel 3 is the color image with 3 different channels.
 #Channel 1 is the one channel image with red memrbanes; Numbers_mask is the image with text numbers in blue for each cell.  
-          outline=outcome[frame_num][2].copy()    
-          if len(outcome[frame_num][2])==0:
+        outline=outcome[frame_num][2].copy()    
+        if len(outcome[frame_num][2])==0:
               break
 #This is applicable to an image with 1 frame. The changes are saved into outcome. 
-          if frame_num==0:
-                Channel3_Mask,Channel1_Mask=watershed(outline)
-                outcome[frame_num][1]=Channel1_Mask.copy()
-                outcome[frame_num][0]=Channel3_Mask.copy()
-                Numbers_Mask=update_numbers(outline,frame_num,"Slow")
-                outcome[frame_num][3]=Numbers_Mask.copy()              
+        if frame_num==0:
+            Channel3_Mask,Channel1_Mask=watershed(outline)
+            outcome[frame_num][1]=Channel1_Mask.copy()
+            outcome[frame_num][0]=Channel3_Mask.copy()
+            Numbers_Mask=update_numbers(outline,frame_num,"Slow")
+            outcome[frame_num][3]=Numbers_Mask.copy()              
 
 #This is applicable to a video with several frames. The changes are saved into outcome. 
 
-          if frame_num>0:
-                prev_frame=outcome[frame_num-1][1].copy()
-                Channel3_Mask,Channel1_Mask=follow_cells_and_watershed(prev_frame,outline)
-                outcome[frame_num][1]=Channel1_Mask.copy()
-                outcome[frame_num][0]=Channel3_Mask.copy()
-                Numbers_Mask=update_numbers(outline,frame_num,"Slow")
-                outcome[frame_num][3]=Numbers_Mask.copy()
+        if frame_num>0:
+            prev_frame=outcome[frame_num-1][1].copy()
+            Channel3_Mask,Channel1_Mask=follow_cells_and_watershed(prev_frame,outline)
+            outcome[frame_num][1]=Channel1_Mask.copy()
+            outcome[frame_num][0]=Channel3_Mask.copy()
+            Numbers_Mask=update_numbers(outline,frame_num,"Slow")
+            outcome[frame_num][3]=Numbers_Mask.copy()
             
-          if boolean==True:
-              saving_location ='saved_work'
-              with open('saved_work', 'wb') as outfile:
-                  pickle.dump(outcome, outfile, pickle.HIGHEST_PROTOCOL)
+        for image_index in range(len(outcome[frame_num])):
+            image_to_save = PIL.Image.fromarray(outcome[frame_num][image_index])
+            image_to_save.save(saving_location + '_im_' + str(image_index) + '_' + str(frame_num) + '.tiff')
+        # save the segmentation frame here:
+#               saving_location ='saved_work'
+
+    if boolean==True:
+        with open(saving_location, 'wb') as outfile:
+            pickle.dump(outcome, outfile, pickle.HIGHEST_PROTOCOL)
+    
+    if frame_num > 1:
+        CELL_DICTIONARY=save_excel(outcome,saving_location + '_cell_info.xls')
                   #outcome is a tuple so tuple to np array
 #                   outcome2= np.asarray(outcome).astype(np.unit8)
                   #array to img 
 #                   outcome3 = array_to_img(outcome3)
 #                   save_img('test.tif', outcome3)     
+    print('Finished saving stuff.')
+        
                     
    #This allows you to visualize the changes you have made but editing is not possible here.
 #Note: this definition is linked to another file called visalize.
@@ -508,6 +521,7 @@ def save_excel(outcome,Save_As):
     sheet1.write(0,1,'Parameter')
     row=1
     for i in range(number_of_frames):
+        #TODO consider break statement here
         sheet1.write(0,2+i,'Frame'+str(i))
 
     row=-8
