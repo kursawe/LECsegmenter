@@ -410,8 +410,8 @@ def process_image(img,a,b,c,d):
 #update numbers is used to update the cell numbers each time you draw of the image in drawing mode
 def update_numbers(membrane_outlines,frame_num,speed="Fast"):
     global Numbers, tiff_images
-    Image_=tiff_images[frame_num]
-    Base_Image=2*(Image_[0]+Image_[1])
+    Image=tiff_images[frame_num]
+    Base_Image=2*(Image[0]+Image[1])
     
     Numbers=np.zeros((dim1,dim2)).astype(np.uint8)
     if speed=="Slow":  
@@ -493,11 +493,11 @@ def display(outcome):
         display= np.hstack((display_left,display_right))
         cv.imshow('Press E to Exit',display)
         cv.moveWindow('Press E to Exit',150,10)
+        #go to next frame
         if k ==ord('p'):
-        #go to previous frame
             if frame_num<(len(outcome)-1):
                 frame_num+=1
-        #go to next frame
+        #go to previous frame
         if k==ord('o'):
             if frame_num>0:
                 frame_num-=1
@@ -602,6 +602,8 @@ list_of_means=[]
 #Estimate the mean brightness and only select the brightest stack and the stack before the brightest
 for tiff_index in range(len(photos)): 
     if photos[tiff_index]!='.DS_Store':
+        print('reading in the file')
+        print(photos[tiff_index])
         tiff_photo=cv.imread(basepath+"/"+photos[tiff_index])
 #mean intensity of the pixels/mean intensity of the image
         list_of_means.append(np.mean(tiff_photo))
@@ -644,6 +646,8 @@ print("Done")
 #run through the local maxima images, and take each img with local maxima/most well defined img and add the previous image to it
 tiff_images=[]
 for Image in local_maxima_list:
+    print('and now rereading the image')
+    print(photos[Image-1])
     tiff_images.append((cv.imread(basepath+"/"+photos[Image],cv.IMREAD_GRAYSCALE),(cv.imread(basepath+"/"+photos[Image-1],cv.IMREAD_GRAYSCALE))))   
 
 Info_Sheet=cv.imread("./Info_Sheet.tiff",cv.IMREAD_GRAYSCALE)
@@ -715,7 +719,15 @@ while iter_photo < len(tiff_images):
     saved_list.append(1)
     #answer=false means we want to continue the previous project and this was saved under a variable called outcome
     if answer==False:
+        print('Attempting to obtain skeletonization from saved data')
         Skeletonized_Image=outcome[iter_photo][2]
+        # if this frame was not processed in previous iterations, then we won't
+        # actually have produced a skeletonized image yet, and have to generate it
+        # from scratch, hence the next two lines.
+        if len(Skeletonized_Image)==0:
+            print('Skeletonization not available from saved data, so I will make a new one')
+            Skeletonized_Image=frame=process_image(Base_Image,118,53,5,1)[6]
+        print('Done. We have a skeletonized image for this frame now')
     #if answer=true then we choose to start a new project and it runs through the process_image defined above  
     if answer==True:
         Skeletonized_Image=frame=process_image(Base_Image,118,53,5,1)[6]
