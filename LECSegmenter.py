@@ -41,7 +41,7 @@ import pickle as pickle
 #library for making interactive graphical user interface applications
 import easygui as gui
 #library to generate spreadsheet files compatible with Microsoft Excel
-from xlwt import Workbook 
+from openpyxl import Workbook 
 #the global keyword ensures the data can be updated and 
 global outcome, CELL_DICTIONARY, MAX_NUMBER_OF_CELLS, tiff_images, dim1, dim2
 MAX_NUMBER_OF_CELLS=0
@@ -510,19 +510,19 @@ def display(outcome):
 def save_excel(outcome,Save_As):
     wb = Workbook()
 #we add a sheet in excel and only work with 1 sheet i..e there are not additional sheets
-    sheet1 = wb.add_sheet('Sheet 1')
+    sheet1 = wb.create_sheet('Sheet 1')
 #we retrive the statistics including surface area, centroid coordinates etc from the cell_dictionary
     CELL_DICTIONARY=get_stats(outcome)
 #The number of frames will define the number of tiff images
     number_of_frames=len(tiff_images)
 #Add a title called cell number in the first row first column
-    sheet1.write(0,0,'Cell Number')
+    sheet1.cell(1,1,'Cell Number')
 #Add a title called Parameter in the first row second column
-    sheet1.write(0,1,'Parameter')
+    sheet1.cell(1,2,'Parameter')
     row=1
     for i in range(number_of_frames):
         #TODO consider break statement here
-        sheet1.write(0,2+i,'Frame'+str(i))
+        sheet1.cell(1,3+i,'Frame'+str(i))
 
     row=-8
     cell_index2=0
@@ -531,27 +531,27 @@ def save_excel(outcome,Save_As):
     #Define the coordinates in teh excel sheet where you want the following labels.
     #The +8 means that the labels are added after every 8th row sunh that 
     #the first 8rows represent the parameters of the first cell the second set of 8 rows the next ect.
-        sheet1.write(1+cell_index2*8,1,"Centroid")
-        sheet1.write(2+cell_index2*8,1,"Surface Area")
-        sheet1.write(3+cell_index2*8,1,"Perimeter")
-        sheet1.write(4+cell_index2*8,1,"Width")
-        sheet1.write(5+cell_index2*8,1,"Length")
-        sheet1.write(6+cell_index2*8,1,"Angle")
-        sheet1.write(7+cell_index2*8,1,"Vertical Height")
-        sheet1.write(8+cell_index2*8,1,"Horizontal Width")
+        sheet1.cell(2+cell_index2*8,2,"Centroid")
+        sheet1.cell(3+cell_index2*8,2,"Surface Area")
+        sheet1.cell(4+cell_index2*8,2,"Perimeter")
+        sheet1.cell(5+cell_index2*8,2,"Width")
+        sheet1.cell(6+cell_index2*8,2,"Length")
+        sheet1.cell(7+cell_index2*8,2,"Angle")
+        sheet1.cell(8+cell_index2*8,2,"Vertical Height")
+        sheet1.cell(9+cell_index2*8,2,"Horizontal Width")
         cell_index2+=1
         for j in range(8):        
-            sheet1.write((j+1)+row,0,str(cell_index))
+            sheet1.cell((j+1)+row+1,1,str(cell_index))
         for frame in range(number_of_frames):
 #The following uses the information in the cell dictionary to fill out the stats information in the excel sheet
-            sheet1.write(1+row,2+frame,str((CELL_DICTIONARY[cell_index][frame][0]))) #2nd row, 2nd column has centroid info
-            sheet1.write(2+row,2+frame,str((CELL_DICTIONARY[cell_index][frame][1]))) #3rd row, 2nd column has surface area info
-            sheet1.write(3+row,2+frame,str((CELL_DICTIONARY[cell_index][frame][2]))) #4th row, 2nd column has perimeter info
-            sheet1.write(4+row,2+frame,str((CELL_DICTIONARY[cell_index][frame][3]))) #5th row, 2nd column has width
-            sheet1.write(5+row,2+frame,str((CELL_DICTIONARY[cell_index][frame][4]))) #6th row, 2nd column has length
-            sheet1.write(6+row,2+frame,str((CELL_DICTIONARY[cell_index][frame][5]))) #7th row, 2nd column has angle
-            sheet1.write(7+row,2+frame,str((CELL_DICTIONARY[cell_index][frame][6]))) #8th row, 2nd column has vertical height
-            sheet1.write(8+row,2+frame,str((CELL_DICTIONARY[cell_index][frame][7]))) #9th row, 2nd column has the horizontal width
+            sheet1.cell(1+row+1,3+frame,str((CELL_DICTIONARY[cell_index][frame][0]))) #2nd row, 2nd column has centroid info
+            sheet1.cell(2+row+1,3+frame,str((CELL_DICTIONARY[cell_index][frame][1]))) #3rd row, 2nd column has surface area info
+            sheet1.cell(3+row+1,3+frame,str((CELL_DICTIONARY[cell_index][frame][2]))) #4th row, 2nd column has perimeter info
+            sheet1.cell(4+row+1,3+frame,str((CELL_DICTIONARY[cell_index][frame][3]))) #5th row, 2nd column has width
+            sheet1.cell(5+row+1,3+frame,str((CELL_DICTIONARY[cell_index][frame][4]))) #6th row, 2nd column has length
+            sheet1.cell(6+row+1,3+frame,str((CELL_DICTIONARY[cell_index][frame][5]))) #7th row, 2nd column has angle
+            sheet1.cell(7+row+1,3+frame,str((CELL_DICTIONARY[cell_index][frame][6]))) #8th row, 2nd column has vertical height
+            sheet1.cell(8+row+1,3+frame,str((CELL_DICTIONARY[cell_index][frame][7]))) #9th row, 2nd column has the horizontal width
             
 #create a new file and name i.e. Cell_info.xls      
     wb.save(Save_As)
@@ -879,7 +879,7 @@ save_all_work(answer)
 
 display(outcome)
 #save to excel file called Cell_Info with all the info in cell dictionary
-CELL_DICTIONARY=save_excel(outcome,'Cell_Info.xls')
+CELL_DICTIONARY=save_excel(outcome,'Cell_Info.xlsx')
 
 print("Done")
 
