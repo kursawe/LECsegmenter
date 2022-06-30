@@ -9,71 +9,185 @@ Created on Mon Nov 25 22:23:53 2019
 #from tkinter import * 
 from tkinter import filedialog
 
-#os provides functions for interacting with the operating system
+"""
+tkinter is an inbuilt Python module used to create graphical user interfaces and widgets such as buttons, checkboxes, labels and menu bars.  tkinter is inbuilt in Python and does not need to be installed manually - hence why the importation code above is commented out. The workflow for using tkinter generally follows this structure:
+
+Import tkinter modules --> create the main window for the app --> Add widgets --> enter the Main event loop.
+
+The Main event loop is given by windowname.mainloop(). This command is given when the application is ready to run and it tells the code to keep displaying.
+"""
+
 import os, sys
 
+"""
+The module os is used to interact with the operating system of the device used, e.g. Windows, Mac, or Linux. The module sys is a set of functions which provide information about the interaction between Python and the operating system, such as what version of Python is running, and sys.exit(), which exits Python.
+"""
+
 basepath = filedialog.askdirectory(initialdir=os.path.dirname(__file__), title="Select folder to analyse")
-print(basepath) 
+
+"""
+tkinter.filedialog is a module used to create file or directory selection windows.  Here, it is used to create a file selection window which asks the user to select the file containing the stacks of images that they wish to analyse using LECSegmenter.
+
+askdirectory prompts the user to select a directory, i.e. the folder containing the stacks of images.
+
+initialdir is the directory that the dialog starts in.  Here, os.path.dirname(__file__) returns a string value which is the directory name of the specified path, i.e. of the file path to the file that the user selected. Using __file__ as the argument of os.path.dirname() ensures that the initial directory, initialdir, is set to the directory of this Python script - i.e. the initial directory that is available for the user to select from is the folder where this script is saved, probably LECSegmenter#readme.
+
+"""
+
+print(basepath)
+
 #Download the following packages: 
 #%matplotlib auto
-#numpy is a multidimensional array used to store values of same datatype and
-#is indexed with values starting from 0
+
 import numpy as np
+
+"""
+NumPy (Numerical Python) is an open source Python library that contains a comprehensive set of mathematical functions.  It is particularly useful for linear algebra.  NumPy provides N-dimensional array with indices starting at zero.
+"""
+
 #opencv
 import cv2 as cv
+
+"""
+Opencv is an open source library for machine learning and image processing, among other applications.  Operations in opencv are combined with operations in NumPy to increase functionality.
+"""
+
 import PIL.Image
+
+"""
+PIL, or the Python Imaging Library, stores Python's image editing functions.  The class Image is used to represent an image within PIL.  
+"""
+
 from tkinter import * 
+
+"""
+import * is risky here.  import * imports all functions from the module tkinter.  If a user accidentally defines a function with the same name as a function within tkinter, the new definition will override the existing function from tkinter.  Therefore, the user should import tkinter as tk or similar, and call functions from tkinter using tk.functionname() when one wants to use the tkinter function and not a manually defined function.
+"""
+
 from tkinter import ttk 
+
+"""
+The module ttk provides 18 widgets for graphical user interfaces: Button, Checkbutton, Entry, Frame, Label, LabelFrame, Menubutton, PanedWindow, Radiobutton, Scale, Scrollbar, Spinbox, Combobox, Notebook, Progressbar, Separator, Sizegrip, and Treeview.  Importing ttk after 'from tkinter import *' means that ttk widgets override tk widgets (the older version of the widget module within tkinter).  The ttk.Style class is then used to style the widgets.  
+"""
+
 #from numpy import asarray
 #from skimage.io import imsave
 # from keras.preprocessing.image import array_to_img
 # from keras.preprocessing.image import save_img
 #skimage.morphology has several modules that can alter morphology of images-skeletanize-binary to one-pic
+
 from skimage.morphology import skeletonize
-#random.randrange returns a randomly selected element from the specified range.
+
+"""
+skimage (Scikit-image) is Python package used for image preprocessing.The module morphology contains functions that process images in different ways. For example, skeletonize(image) returns the skeleton of a binary image, whereas watershed(image, markers) returns a matrix labelled using the watershed segmentation algorithm.
+"""
+
+
 from random import randrange
-#a plotting library
+
+"""
+random.randrange returns a randomly selected element from the specified range.
+"""
+
 from matplotlib import pyplot as plt
-# helps calculate the relative extrema of data
+
+"""
+Plotting library.
+"""
+
+
 from scipy.signal import argrelextrema
-#object hierarchy is converted into a byte stream??-read, write and retrive
+
+"""
+Scipy.signal is used for signal processing. argrelextrema(data, comparator[, axis, ...]) calculates the relative extrema of data. 'data' is the array in which to find the relative extrema. The comparator is the function used to compare two data points.  It should take two arrays as its arguments.
+"""
+
 import pickle as pickle
-#library for making interactive graphical user interface applications
+
+"""
+
+"""
+
+
 import easygui as gui
-#library to generate spreadsheet files compatible with Microsoft Excel
+
+"""
+Graphical user interface library.
+"""
+
 from openpyxl import Workbook 
-#the global keyword ensures the data can be updated and 
+
+"""
+Openpyxl is a library for working with spreadsheet files compatible with Microsoft Excel. It allows one to read the spreadsheet, cycle through rows, extract data, and write new data to the spreadsheet. Workbook is the Excel compatible file modified; this may contain multiple worksheets. One can use Openpyxl to modify a Workbook without opening third-party Microsoft Excel software.
+
+'import Workbook' creates a new Workbook with at least one sheet.  One can then name the Workbook using name = Workbook()
+"""
+
 global outcome, CELL_DICTIONARY, MAX_NUMBER_OF_CELLS, tiff_images, dim1, dim2
+
+"""
+Specifying the above variables to be global means that they have a global scope, as opposed to being defined for use within a specific function.
+"""
+
 MAX_NUMBER_OF_CELLS=0
-  #this opens a box asking you if you want to start over or continue 
+
+"""
+The global variable MAX_NUMBER_OF_CELLS is now assigned to zero.
+"""
+
 answer=gui.buttonbox("Would you like to Start Over or Continue Previous Project?",choices=("Start Over","Previous Project"))
-#if you choose to start over we asign the value true
+
+"""
+This opens a box asking you if you want to start over or continue.  Start Over means that you will be asked to select a file of image stacks to analyse.  If one chooses to Continue Previous Project, the programme will retrieve previously segmented images. 
+"""
+
+
 if answer=="Start Over":
     answer=True
-    #if you choose to continue, we asign the value false. 
     saving_location = filedialog.asksaveasfilename(initialdir = os.path.dirname(__file__),title = "Select saving location",filetypes = (("all files","*.*"),))
+    
+"""
+If one chooses to start over, the answer is assigned the value True.  Then, asksaveasfilename, a function from the module filedialog within the module tkinter, produces a window directing the user to choose a saving location for the segmented images.  The initialdir is set to the folder in which this code is located - usually LECSegmenter#readme, which is called by __file__.
+"""   
+    
 if answer=="Previous Project":
     answer=False
     loading_location = filedialog.askopenfilename(initialdir = os.path.dirname(__file__),title = "Select loading location",filetypes = (("all files","*.*"),))
     saving_location = loading_location
-#If False is selected, then it opens saved work, where rb is the reading and writing mode
-    #pickling is a method to serialize objects, save it to a file and retrive them later and pickle.load is assigned to directory called outcome
+    
+"""
+If the answer is 'Previous Project', the answer is assigned the value False.  A window is created which asks the user to select a loading location, that is, to select the file containing the previously analysed images.  The saving location is set to the loading location, such that, when changes to the images are made, the newer versions are saved to the same folder that they were retrieved from prior to modification.
+"""
+
     with open(loading_location, 'rb') as infile:
         outcome = pickle.load(infile)
         
-#def is used to define a function;
-#meges_red overlapz the skeletonized image 2 (with red skeleton around membranes) with background which is image 1
+"""
+'with open(loading_location, 'rb') as infile:' opens the selected saved work in the reading and writing mode ('rb') as an infile, which means that the contents of this saved file will be eventually written out to a second file, the outfile.
+Serialization saves the state of an object from any process, so that it can be deserialisaed later to continue the process. Pickle is a Python-specific deserialization which converts the object into a binary string. Note that problems can occur if the file being unpickled was pickled using a different version of Python.
+Pickle.load unpickles the file infile.  Therefore, 'outcome' is the unpickled version of the file opened from the loading location.  In other words, the previous project is opened from the loading location chosen by the user, unpickled, and named 'outcome'.
+"""
+        
 def merges_red(img1,img2,amount):
-    # cv.cvtColor function defined by cv2.cvtColor(src, code[, dst[, dstCn]]), src=input image 1 and the code=cv.COLOR_GRAY2BGR is converting grayscale to blue-green-red channels and
     overlay = cv.cvtColor(img1, cv.COLOR_GRAY2BGR)
-    # the function cv.split splits the overlay into blue, green and red channels
     b,g,r = cv.split(overlay)
-    #r/dst/destination=red channel, cv.add= is adding image1 & 2 to to red-channel, dttye/datatype=cv.CV_8U: support source image1 of 8-bit-RGBA and keep desitnation image same size and type as source image; what is mask=image2?
     r = cv.add(r,amount, dst = r, mask =img2, dtype = cv.CV_8U)
-    #we merge the 3 channels of image1
     merged=cv.merge((b,g,r),img1)
-    #return the merged image
     return merged
+
+"""
+Defining a new function, merges_red, with arguments img1, img2, and amount. The purpose of this function is to produce the original image (img1) overlaid with a red skeleton outlining the cell membranes (img2). cvtColor is used to convert an image between colour spaces. It is accessed from Opencv (here cv2, imported as cv). cvtColor has syntax 
+cv.cvtColor[src, code[,dst[,dstCn]])
+where src is the name of the image to be converted, code is the colour space conversion code, and dst, dstCn are optional parameters. The code cv.COLOR_GRAY2BGR converts a grayscale image to blue-green-red channels.
+
+b,g,r = cv.split(overlay) splits the overlay BGR image into separate blue, green, and red channels, which are independently assigned to the variables b,g, and r.
+
+The variable r is then updated by adding 'amount' to the pixel values. dst is an output array that has the same size and number of channels as the input.  
+
+cv.merge merges the split overlay image with img 1 to produce a single composite image, which is returned as the output of the function.
+
+"""
+
 #the same is repeated for blue and green channels
 #merges_blue overlaps the blue labelled centroid labels in image 1 with the background in image 2
 def merges_blue(img1,img2,amount):
@@ -87,20 +201,16 @@ def merges_green(img1,img2,amount):
     g = cv.add(g,amount, dst = g, mask =img2, dtype = cv.CV_8U)
     merged=cv.merge((b,g,r),img1)
     return merged
-#after binarizing the image (later),the membrane is assigend 0 and the background is assigned 1
-#then find connected pickels and remove small connected objects in the image if under minimum size defined 
+
+"""
+The same is repeated for the blue and green channels.
+"""
+
+
 def removesmallelements(img,minsize):
-    #to ensure the putput img is the same size as input img
     img=img.astype(np.uint8)
-    #find all connected components and remove small blobs, nb_comp is number of cells;
-    #output labels each cell with a diff number
-    #stats gives surface area,perimeter, angle etc defined under get_stats
-    #connectivity=defines number of connections/just checks the top, bottom, left, and right pixels and sees if they connect 8-way
     nb_components, output, stats, centroids = cv.connectedComponentsWithStats(img, connectivity=8)
-    #connectedComponentswithStats yields every separated component with information on each of them, such as size
-    #size of membrane is defined
     sizes = stats[1:, -1]; nb_components = nb_components - 1
-    #assign 0 to membrane 
     img2 = np.zeros((output.shape))
     #for every component in the image, you keep it only if it's above minimum size of membrane
     for i in range(0, nb_components):
@@ -108,71 +218,114 @@ def removesmallelements(img,minsize):
             img2[output == i + 1] = 255
     return(img2)
 
-#null statement 
+"""
+A function to remove small objects from the final image.  
+
+img = img.astype(np.uint8) creates a copy of the image (that is, a copy of the image array) cast to the data type uint8, which stores 8-bit numbers (numbers 0-255).  If a value of an entry x is greater than 255, the returned value will be x mod 255.
+
+cv.connectedComponentsWithStats(img, connectivity=8)
+This function analyses an 8-bit single-channel (grayscale) image.  In this case, this is the input img, which was set to 8-bit using the previous function img.astype(np.uint8). The function searches for 8-way connectivity between pixels; that is, pixels are said to be neighbours if they touch at an edge or a corner (compare to 4-way connectivity, in which pixels are only classified as neighbours if they share an edge).
+nb_components is the number of cells.  output labels each cell with a different number.  stats gives the surface area, perimeter, etc. of each cell.  Centroids gives the co-ordinates of the cell centroids.  The x- and y-coordinates of a cell centroid are extracted using centroids(label,0) and centroids(label,1) respectively.
+
+sizes = stats[1:, -1]; nb_components = nb_components - 1
+Defines the sizes of the membranes and reduces the number of cells by one.
+
+img2 = np.zeros((output.shape))
+Sets the pixels of img2 to zero.
+
+The for loop ensures that only membranes above the specified minimum size are retained in the image.
+"""
+
+
 def nothing(x):
     pass
 
-#marker based image segmentation
+"""
+This function is a placeholder.  When it is called, it is read by the interpreter and results in no operation.
+"""
+
+
 def watershed(img):
-    #global lets u call img after function and b1 and stats only used for debugging.
-    #Eg. if we don't use global we can't call the img function outside of this def
     global b1,stats
-    
-# purpose of edges= np.pad(np.ones..) is to assign a value of 1 around the image like a box of ones
-# and removes the incomplete cells on the edges of the image 
-    #dim1 -xaxis and y-axis dimensions of img,1-2 i.e. 512x 512 pixels
-    #np.pad= padding an area, astype.=to help faciliate size conversion/maintenance of 8bit when working with cv2 and numpy 
     edges= np.pad(np.ones((dim1-2,dim2-2)), pad_width=1, mode='constant', constant_values=0) 
-     # print(img,edges)
+    
     img=img*edges
     img=img.astype(np.uint8)
-    # This code helps find all connected components. 
+    
+"""
+edges= np.pad(np.ones..) 
+
+np.pad returns a padded array of rank equal to an array with shape increased according to pad_width.  The array to be padded is np.ones((dim1-2,dim2-2)), which is an array of ones with dimensions two pixels less in each axis relative to img. The pad width is set to one pixel and the constant value of the pad is set to zero.  The output is an array the same size as img, with edge pixels of value 0 and inner pixels of value 1.
+
+This array is multiplied by the image array, such that all edge pixels in the image now have value 0 and all internal pixels are unchanged.
+
+The image is then cast to 8-bit type for consistency.
+"""
+ 
     nb_components, output, stats, centroids = cv.connectedComponentsWithStats(cv.bitwise_not(img),\
     connectivity=4)
-    #np.zero to assign value of 0 to membranes in all 3 channels 
+    
+"""
+Extracts the number of cells, cell indices, statistics and centroid coordinates of the complement of img - that is, the image array that is analysed is the inversion of img, where pixels of value 1 in img now have value 0 and vice versa. 4-way connectivity.
+"""
+
     b1=np.zeros((dim1,dim2)).astype(np.uint8)
     g1=np.zeros((dim1,dim2)).astype(np.uint8)
     r1=np.zeros((dim1,dim2)).astype(np.uint8)
-    #this is the background component which is separated from the rest of the components?
+    
+"""
+Three zero arrays of the same dimensions as img, with 8-bit type, are created.
+"""
+
     sizes = stats[1:, -1]; nb_components = nb_components - 1
-    #for every component in the image, you keep it only if it's above min_size of 10pixels. otherwise give an output of 0.
     for i in range(0, nb_components):
         if sizes[i] <=10 :
             output[output==i+1]=0
-      #dialate segmentation boundaries-to make membrane thicker e.g if we have one white pixel on the membrane some neighboring white pixels surrounding the membrane will turn white
-            #no kernels,iteration/number of times dilation is applied      
+            
+"""
+The for loop removes components of total size less than or equal to 10 pixels from the watershed image by setting the output to zero if the size is <= 10 pixels.
+"""
+
     output=cv.dilate(output.astype(np.uint8),None,iterations=1)
+    
+"""
+Dilation increases the area of the white regions of the image output.astype(np.uint8). This makes the cell boundaries thicker.  Increasing the number of iterations would increase the thickness of the white regions. Note that Opencv interprets white regions as the object, so a black boundary on a white background would become thinner under dilation.
+"""
+
     for i in range(0, nb_components):
-        #are we assigning a random color to each cell but not to the cells at the edges which are above a size of 10,000 
         if sizes[i] <=10000 : #MAX CELL SIZE
-            #e.g. if i is 1, the output is 2 means all the pixels labelled 2 i.e. 1 cell will be assigned 1 random colour
 #[0] is for blue, [1] is for red and [2] is for green defined under colour[] later.
             b1[output == i + 1]=colors[i][0]
             g1[output == i + 1]=colors[i][1]
             r1[output == i + 1]=colors[i][2]
-            #merge the 3 channels
     image=cv.merge((b1,g1,r1))
-    #display this image (where every pixel has 3 values) and output (where every pixel has 1 value for each channel)
     return (image,output)
+
+"""
+A random colour is assigned to each cell that has a size less than 10000 pixels.  This ensures that the area around the edges of the group of segmented cells, which is the background for our purposes but would be interpreted as a connected object, is not assigned a colour and remains black.
+
+The zero arrays for blue, green and red channels (b1, g1 and r1) are modified so that pixels where the output array has the same value (i.e. pixels within the boundaries of a single cell) are assigned unique hues of blue, green and red using colors[i][0] (blue hue), colors[i][1] (green hue) and colors[i][2].  
+
+The three colour channels are then merged to produce the watershed image, which is returned together with the cell outlines.
+"""
 
 def simple_watershed(img):
     global output,Centroid_list,nb_components
-    #Is the centroid list with coordinates of centroid x,y 
     Centroid_list=[]
-    #again we want to exclude the cells near the edge which are incomplete and hence assign value of 1
+    
     edges= np.pad(np.ones((dim1-2,dim2-2)), pad_width=1, mode='constant', constant_values=0)   
     img=img*edges
     img=img.astype(np.uint8)
-    #find all connected components/4-way pixels and remove small blobs 
+    
     nb_components, output, stats, centroids = cv.connectedComponentsWithStats(cv.bitwise_not(img),\
     connectivity=4)
-    #nb_components denotes number of cells; output denotes label for cells; stats denotes surface area etc,
+    
     sizes = stats[1:, -1]; nb_components = nb_components -1
- #for every component in the image, you keep it only if it's equal to or below 10
+ 
     for i in range(0, nb_components):
         if sizes[i] <=10 :
             output[output==i+1]=0
-            #if cell index is > 1 and if elemnts are above a size of 0, return the centroid coordinates where cx= np.where(output==cell_index)[0]) and cy=np.where(output==cell_index)[1])
+           
     for cell_index in range(0,nb_components+1):
         if cell_index>1:
             if np.where(output==cell_index)[0].size>0:
@@ -180,33 +333,37 @@ def simple_watershed(img):
 #return the label on cell i.e. output and the centroid list with cx,cy coordinates
     return (output,Centroid_list)
 
-#frame is a mask where all the cell pixels are labelled with numbers specific to each cell
-#np.unique gives all the unique values of cell numbers in the mask
+"""
+simple_watershed creates a list containing the (x,y) coordinates of each cell centroid and the index of the cell.  The function then returns the cell labels (output) and the list of centroid coordinates and cell indices.
+"""
+
+
 def get_centroids(frame):
     Centroid_list=[]
     nb_components=list(np.unique(frame))
     for cell_index in nb_components:
-        #if the cell index is >1 i.e. since membrane=0; background=1 so >1 would be given to pixels inside the cells
         if cell_index>1:
-            #np.where gives the mean coordinates of centroid; size>0 is likely a debugging step.
             if np.where(frame==cell_index)[0].size>0:
-                #np.where(frame==cell_index)[0] denotes x coordinate, np.where(frame==cell_index)[1] denotes y coordinate and cell index is number of cell
                 Centroid_list.append(((np.mean(np.where(frame==cell_index)[0]),np.mean(np.where(frame==cell_index)[1])),cell_index))
-#this will have x,y of centroid in each cell with its cell number
     return (Centroid_list)
-#returns a unique list of three dictionaries with collector statistics? What kind of of stats exactly?
+
+
+"""
+frame is a mask in which cell pixels are labelled with the corresponding cell label.  nb_components=list(np.unique(frame)) creates a list of all the unique labels in frame, i.e. the indices of the cells.  
+The for loop then considers cases where the cell index is greater than one and where the mean centroid x-coordinate (np.where(frame==cell_index)[0]) is greater than zero (probably for debugging purposes). Provided these two conditions are met, the cell index and the (x,y) co-ordinates of its centroid are appended to Centroid_list.
+The output is a list of cell indices and corresponding centroid coordinates.
+"""
+
 def get_stats(input_data):
-    #input data
-    #global is again used here for debugging
-    #cnt is contour; rect:rectangle; CELL_DICTIONARY is defined as a list with numbers, words etc.CELL_DICTIONARY is the big dictionary with all the data on every index.
-    global cnt,rect, CELL_DICTIONARY
-    #dim1 and dim2 represent the x and y coordinates of the image 512x 512 pixels sq
-    #dim1 and dim2 ensures that the program can only run images of the same dimensions as dim1 and dim2
-    #for every cell, set background as 0. Question: how can both background and membrane be set to 0?
+    global cnt,rect, CELL_DICTIONARY 
     background=np.zeros((dim1,dim2))
     CELL_DICTIONARY={}
-    #nb_components is the number of cells so the if conditions will run through every cell in the image.
-    nb_components=list(np.unique(input_data[0][1]))      
+    nb_components=list(np.unique(input_data[0][1]))
+
+"""
+Define a function to obtain information about cell size, shape etc. that will be stored in CELL_DICTIONARY. First, we create a zero array (background) with the same dimensions as the image. 
+"""
+
     for cell_index in range(MAX_NUMBER_OF_CELLS+1):
         if cell_index>1:
             CELL_DICTIONARY[cell_index]=[]
@@ -214,6 +371,7 @@ def get_stats(input_data):
     for frame_index in range(len(input_data)): 
         frame=input_data[frame_index][1].copy()
         nb_components=list(np.unique(frame))
+        
         for cell_index in nb_components:
             if cell_index>1:
 
@@ -267,6 +425,9 @@ def get_stats(input_data):
                 
         
     return (CELL_DICTIONARY)
+
+
+
 #suppose we have two images img 1/pre-image at time t and img 2/post-image at time t+1
 def follow_cells_and_watershed(prev_img,img):
     #this function tries to go through every frame in the video and tries to match a cell in the post image with the pre-image
@@ -336,7 +497,10 @@ def follow_cells_and_watershed(prev_img,img):
     image=cv.merge((b2,g2,r2))
     #imgge is where every pixel has 3 values (RGB) and mask is an image where each pixel has 1 value
     return image, mask
-#graphic user interface:two main modes=drawing and automatic. 
+
+
+
+
 def GUI(event,x,y,flags,param):
     
     global Skeletonized_Image,Cursor
@@ -345,7 +509,12 @@ def GUI(event,x,y,flags,param):
     
     Cursor=np.zeros((dim1,dim2)).astype(np.uint8)
     Skeletonized_Image=saved_list[len(saved_list)-1].copy()
-    #drawing mode
+
+"""
+Function to create the graphical user interface.  The cursor is first created as an 8-bit zero array with the same dimensions as the image. 
+"""
+
+#drawing mode
     if drawing==True:
         if mode==True:
             if event == cv.EVENT_LBUTTONDOWN:
@@ -372,6 +541,9 @@ def GUI(event,x,y,flags,param):
         if event== cv.EVENT_LBUTTONDOWN:            
             saved_list.append(Skeletonized_Image.copy())
             update_numbers(saved_list[-1],iter_photo)
+            
+            
+            
 
 def process_image(img,a,b,c,d):
     if c <1:
@@ -406,6 +578,9 @@ def process_image(img,a,b,c,d):
     return (img,GAUSSTHRESH,img4.astype(np.uint8),img6,Skeletonized_Image_BGR,Watershed,Skeletonized_Image)
 
 
+
+
+
 #There are two modes but slow was not used probably because it was too slow.
 #update numbers is used to update the cell numbers each time you draw of the image in drawing mode
 def update_numbers(membrane_outlines,frame_num,speed="Fast"):
@@ -432,6 +607,9 @@ def update_numbers(membrane_outlines,frame_num,speed="Fast"):
     left_panel=merges_blue(pre_left_panel,Numbers,255)
 
     return left_panel
+
+
+
 
 def save_all_work(boolean):
     print('Start saving')
@@ -479,7 +657,10 @@ def save_all_work(boolean):
 #                   save_img('test.tif', outcome3)     
     print('Finished saving stuff.')
         
-                    
+         
+            
+            
+            
    #This allows you to visualize the changes you have made but editing is not possible here.
 #Note: this definition is linked to another file called visalize.
 def display(outcome):
@@ -506,6 +687,9 @@ def display(outcome):
             break              
         
     cv.destroyAllWindows()
+    
+    
+    
 #The following def saves all work to an excel file known as Cell info (mentioned later in the code).
 def save_excel(outcome,Save_As):
     wb = Workbook()
@@ -558,6 +742,9 @@ def save_excel(outcome,Save_As):
     
     return CELL_DICTIONARY
 #not implemented in program
+
+
+
 def plot_cell_movement(CELL_DICTIONARY):     
     X = np.array(())
     Y= np.array(())
@@ -584,6 +771,20 @@ def plot_cell_movement(CELL_DICTIONARY):
     plt.ylim(0,dim2)  
     plt.show()
 
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 #Definitions complete. 
 #This is the start of the code.  
 print("Reading files...")
@@ -751,6 +952,9 @@ while iter_photo < len(tiff_images):
         switch = 'Contours: 0 : OFF \n1 : ON'
         switch2 = 'Labels: 0 : OFF \n1 : ON'
         cv.createTrackbar(switch, Image_str,1,1,nothing)
+        blablatest = cv.getTrackbarPos(switch,Image_str)
+        print("the trackbar position is now:")
+        print(blablatest)
         cv.createTrackbar(switch2, Image_str,1,1,nothing)
         cv.setMouseCallback(Image_str,GUI)
   #This is the popup with 6 images that allows you to alter different threholds but does not allow drawing 
@@ -770,8 +974,9 @@ while iter_photo < len(tiff_images):
     
 #creating a loop until break is used
     while(1):
-        a1 = cv.getTrackbarPos(switch,Image_str) #this is contours on the trackbar
-        a2 = cv.getTrackbarPos(switch2,Image_str) #this is labels on the trackbar
+        if not Display_Mode:
+            a1 = cv.getTrackbarPos(switch,Image_str) #this is contours on the trackbar
+            a2 = cv.getTrackbarPos(switch2,Image_str) #this is labels on the trackbar
         k = cv.waitKey(1) & 0xFF
         #have you clicked on button m? 
         if k == ord('m'):
