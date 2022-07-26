@@ -155,18 +155,18 @@ if answer=="Previous Project":
     loading_location = filedialog.askopenfilename(initialdir = os.path.dirname(__file__),title = "Select loading location",filetypes = (("all files","*.*"),))
     saving_location = loading_location
     
-"""
-If the answer is 'Previous Project', the answer is assigned the value False.  A window is created which asks the user to select a loading location, that is, to select the file containing the previously analysed images.  The saving location is set to the loading location, such that, when changes to the images are made, the newer versions are saved to the same folder that they were retrieved from prior to modification.
-"""
+    """
+    If the answer is 'Previous Project', the answer is assigned the value False.  A window is created which asks the user to select a loading location, that is, to select the file containing the previously analysed images.  The saving location is set to the loading location, such that, when changes to the images are made, the newer versions are saved to the same folder that they were retrieved from prior to modification.
+    """
 
     with open(loading_location, 'rb') as infile:
         outcome = pickle.load(infile)
         
-"""
-'with open(loading_location, 'rb') as infile:' opens the selected saved work in the reading and writing mode ('rb') as an infile, which means that the contents of this saved file will be eventually written out to a second file, the outfile.
-Serialization saves the state of an object from any process, so that it can be deserialisaed later to continue the process. Pickle is a Python-specific deserialization which converts the object into a binary string. Note that problems can occur if the file being unpickled was pickled using a different version of Python.
-Pickle.load unpickles the file infile.  Therefore, 'outcome' is the unpickled version of the file opened from the loading location.  In other words, the previous project is opened from the loading location chosen by the user, unpickled, and named 'outcome'.
-"""
+    """
+    'with open(loading_location, 'rb') as infile:' opens the selected saved work in the reading and writing mode ('rb') as an infile, which means that the contents of this saved file will be eventually written out to a second file, the outfile.
+    Serialization saves the state of an object from any process, so that it can be deserialisaed later to continue the process. Pickle is a Python-specific deserialization which converts the object into a binary string. Note that problems can occur if the file being unpickled was pickled using a different version of Python.
+    Pickle.load unpickles the file infile.  Therefore, 'outcome' is the unpickled version of the file opened from the loading location.  In other words, the previous project is opened from the loading location chosen by the user, unpickled, and named 'outcome'.
+    """
         
 def merges_red(img1,img2,amount):
     overlay = cv.cvtColor(img1, cv.COLOR_GRAY2BGR)
@@ -252,45 +252,45 @@ def watershed(img):
     img=img*edges
     img=img.astype(np.uint8)
     
-"""
-edges= np.pad(np.ones..) 
-
-np.pad returns a padded array of rank equal to an array with shape increased according to pad_width.  The array to be padded is np.ones((dim1-2,dim2-2)), which is an array of ones with dimensions two pixels less in each axis relative to img. The pad width is set to one pixel and the constant value of the pad is set to zero.  The output is an array the same size as img, with edge pixels of value 0 and inner pixels of value 1.
-
-This array is multiplied by the image array, such that all edge pixels in the image now have value 0 and all internal pixels are unchanged.
-
-The image is then cast to 8-bit type for consistency.
-"""
+    """
+    edges= np.pad(np.ones..) 
+    
+    np.pad returns a padded array of rank equal to an array with shape increased according to pad_width.  The array to be padded is np.ones((dim1-2,dim2-2)), which is an array of ones with dimensions two pixels less in each axis relative to img. The pad width is set to one pixel and the constant value of the pad is set to zero.  The output is an array the same size as img, with edge pixels of value 0 and inner pixels of value 1.
+    
+    This array is multiplied by the image array, such that all edge pixels in the image now have value 0 and all internal pixels are unchanged.
+    
+    The image is then cast to 8-bit type for consistency.
+    """
  
     nb_components, output, stats, centroids = cv.connectedComponentsWithStats(cv.bitwise_not(img),\
     connectivity=4)
     
-"""
-Extracts the number of cells, cell indices, statistics and centroid coordinates of the complement of img - that is, the image array that is analysed is the inversion of img, where pixels of value 1 in img now have value 0 and vice versa. 4-way connectivity.
-"""
+    """
+    Extracts the number of cells, cell indices, statistics and centroid coordinates of the complement of img - that is, the image array that is analysed is the inversion of img, where pixels of value 1 in img now have value 0 and vice versa. 4-way connectivity.
+    """
 
     b1=np.zeros((dim1,dim2)).astype(np.uint8)
     g1=np.zeros((dim1,dim2)).astype(np.uint8)
     r1=np.zeros((dim1,dim2)).astype(np.uint8)
     
-"""
-Three zero arrays of the same dimensions as img, with 8-bit type, are created.
-"""
+    """
+    Three zero arrays of the same dimensions as img, with 8-bit type, are created.
+    """
 
     sizes = stats[1:, -1]; nb_components = nb_components - 1
     for i in range(0, nb_components):
         if sizes[i] <=10 :
             output[output==i+1]=0
             
-"""
-The for loop removes components of total size less than or equal to 10 pixels from the watershed image by setting the output to zero if the size is <= 10 pixels.
-"""
+    """
+    The for loop removes components of total size less than or equal to 10 pixels from the watershed image by setting the output to zero if the size is <= 10 pixels.
+    """
 
     output=cv.dilate(output.astype(np.uint8),None,iterations=1)
     
-"""
-Dilation increases the area of the white regions of the image output.astype(np.uint8). This makes the cell boundaries thicker.  Increasing the number of iterations would increase the thickness of the white regions. Note that Opencv interprets white regions as the object, so a black boundary on a white background would become thinner under dilation.
-"""
+    """
+    Dilation increases the area of the white regions of the image output.astype(np.uint8). This makes the cell boundaries thicker.  Increasing the number of iterations would increase the thickness of the white regions. Note that Opencv interprets white regions as the object, so a black boundary on a white background would become thinner under dilation.
+    """
 
     for i in range(0, nb_components):
         if sizes[i] <=10000 : #MAX CELL SIZE
@@ -330,7 +330,7 @@ def simple_watershed(img):
         if cell_index>1:
             if np.where(output==cell_index)[0].size>0:
                 Centroid_list.append(((np.mean(np.where(output==cell_index)[0]),np.mean(np.where(output==cell_index)[1])),cell_index))
-#return the label on cell i.e. output and the centroid list with cx,cy coordinates
+    #return the label on cell i.e. output and the centroid list with cx,cy coordinates
     return (output,Centroid_list)
 
 """
@@ -360,9 +360,9 @@ def get_stats(input_data):
     CELL_DICTIONARY={}
     nb_components=list(np.unique(input_data[0][1]))
 
-"""
-Define a function to obtain information about cell size, shape etc. that will be stored in CELL_DICTIONARY. First, we create a zero array (background) with the same dimensions as the image. 
-"""
+    """
+    Define a function to obtain information about cell size, shape etc. that will be stored in CELL_DICTIONARY. First, we create a zero array (background) with the same dimensions as the image. 
+    """
 
     for cell_index in range(MAX_NUMBER_OF_CELLS+1):
         if cell_index>1:
