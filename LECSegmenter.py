@@ -510,11 +510,11 @@ def GUI(event,x,y,flags,param):
     Cursor=np.zeros((dim1,dim2)).astype(np.uint8)
     Skeletonized_Image=saved_list[len(saved_list)-1].copy()
 
-"""
-Function to create the graphical user interface.  The cursor is first created as an 8-bit zero array with the same dimensions as the image. 
-"""
+    """
+    Function to create the graphical user interface.  The cursor is first created as an 8-bit zero array with the same dimensions as the image. 
+    """
 
-#drawing mode
+    #drawing mode
     if drawing==True:
         if mode==True:
             if event == cv.EVENT_LBUTTONDOWN:
